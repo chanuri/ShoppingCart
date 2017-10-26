@@ -32,57 +32,66 @@ namespace ShoppingCart.Services
                 Product = new Product() { Code = "test1", Id = 4, Price = 100 },
                 Qty = 4
             });
-            CacheSet(mycart);
+            var cartData = new List<Cart>();
+            cartData.Add(mycart);
+            CacheSet(cartData);
         }
 
-        private Cart CacheGet()
+        private List<Cart> CacheGet()
         {
-            var cacheEntry = _cache.Get(CacheKeys.ShoppingCartEntry) as Cart;
+            var cacheEntry = _cache.Get(CacheKeys.ShoppingCartEntry) as List<Cart>;
             return cacheEntry;
         }
-        public bool CacheSet(Cart item)
+        public bool CacheSet(List<Cart> itemList)
         {
-            _cache.Set(CacheKeys.ShoppingCartEntry, item);
+            _cache.Set(CacheKeys.ShoppingCartEntry, itemList);
             return true;
         }
-
+        public bool CacheSet(Cart cart)
+        {
+            var oldCartList = CacheGet();
+            oldCartList.Remove(oldCartList.FirstOrDefault(r => r.Id == cart.Id));
+            oldCartList.Add(cart);
+            CacheSet(oldCartList);
+            return true;
+        }
         public Cart GetCart(int? id)
         {
             // for the perpose of excersize there should be a one cart
-            return CacheGet();
+            return CacheGet().FirstOrDefault(row=>row.Id==id);
         }
-
-        public bool AddToCart(OrderItems item)
+        
+        public bool AddToCart(int? id,OrderItems item)
         {
-            var cart= CacheGet();
+            var cart = GetCart(id);
             if (item != null && item.Product.Id > 0 && item.Qty > 0)
             {
-                cart.Items.Add(item);
-                return true;
-            }
-            return false;
-        }
-
-        public bool UpdateCartItem(int itemId, int qty)
-        {
-            var cart = CacheGet();
-            var item = cart.Items.FirstOrDefault(row => row.Product.Id == itemId);
-            cart.Items.Remove(item);
-            if (item!=null)
-            {
-                item.Qty = qty;
                 cart.Items.Add(item);
                 CacheSet(cart);
                 return true;
             }
             return false;
-            
+        }
+
+        public bool UpdateCartItem(int? id,int? itemId, int? qty)
+        {
+            var cart = GetCart(id);
+            var item = cart.Items.FirstOrDefault(row => row.Product.Id == itemId);
+            cart.Items.Remove(item);
+            if (item!=null)
+            {
+                item.Qty = (int)qty;
+                cart.Items.Add(item);
+                CacheSet(cart);
+                return true;
+            }
+            return false;            
 
         }
 
-        public bool RemoveItem(int itemId)
+        public bool RemoveItem(int? id, int? itemId)
         {
-            var cart = CacheGet();
+            var cart = GetCart(id);
             var item = cart.Items.FirstOrDefault(row => row.Product.Id == itemId);
             cart.Items.Remove(item);
             CacheSet(cart);

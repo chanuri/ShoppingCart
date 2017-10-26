@@ -33,11 +33,7 @@ namespace ShoppingCart
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseMvc(routes =>
-                {
-                    routes.MapRoute("default", "api/{controller}/{id?}");
-                  
-                });
+            app.UseMvc();
         }
     }
 }

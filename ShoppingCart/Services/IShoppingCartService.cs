@@ -9,8 +9,8 @@ namespace ShoppingCart.Services
     public interface IShoppingCartService
     {
         Cart GetCart(int? id);
-        bool AddToCart(OrderItems item);
-        bool UpdateCartItem(int itemId, int qty);
-        bool RemoveItem(int itemId);
+        bool AddToCart(int? id,OrderItems item);
+        bool UpdateCartItem(int? id,int? itemId, int? qty);
+        bool RemoveItem(int? id,int? itemId);
     }
 }
